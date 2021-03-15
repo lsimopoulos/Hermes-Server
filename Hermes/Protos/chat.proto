@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option csharp_namespace = "Hermes.Protos";
+
+package chat;
+
+// The chatter service definition.
+service Chatter {
+	//Chat a text message
+	rpc Chat (stream SendRequest) returns (stream ChatReply);
+}
+
+// The request message containing the  message.
+message SendRequest {
+	string message = 1;
+}
+
+
+// The response message containing the message.
+message ChatReply {
+	string message = 1;
+}
