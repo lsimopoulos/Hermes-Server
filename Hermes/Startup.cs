@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Net.Http;
+using System.Security.Cryptography.X509Certificates;
 using Hermes.IdentityServer;
 using Hermes.Services;
 using IdentityServer4.AccessTokenValidation;
@@ -19,40 +20,36 @@ namespace Hermes
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddGrpc(options =>
-            {
-                options.EnableDetailedErrors = true;
-
-            });
-
-
-
-            services.AddAuthentication
-            (o =>
-            {
-                o.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                o.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                o.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-                .AddIdentityServerAuthentication(JwtBearerDefaults.AuthenticationScheme, options =>
-                {
-                    options.Authority = "https://localhost:7001/";
-                    options.RequireHttpsMetadata = true;
-                    IdentityModelEventSource.ShowPII = true;
-                    
-
-                    options.JwtBackChannelHandler = new HttpClientHandler
-                    {
-                        ServerCertificateCustomValidationCallback =
-                            delegate { return true; }
-                    };
-                });
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("secureHermes", policy =>
                 {
                     policy.RequireClaim("scope", "hermes");
                 });
+            });
+
+            services.AddAuthentication
+        (o =>
+        {
+            o.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            o.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            o.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+            .AddIdentityServerAuthentication(JwtBearerDefaults.AuthenticationScheme, options =>
+            {
+                options.Authority = "https://localhost:7001/";
+                options.RequireHttpsMetadata = true;
+                options.ApiName = "hermes";
+                options.ApiSecret = "superdupersecret";
+                IdentityModelEventSource.ShowPII = true;
+
+
+
+                options.JwtBackChannelHandler = new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback =
+                        delegate { return true; }
+                };
             });
 
             services.AddIdentityServer(options =>
@@ -70,8 +67,13 @@ namespace Hermes
                 .AddInMemoryPersistedGrants()
                 .AddTestUsers(Config.GetUsers());
 
+            services.AddGrpc(options =>
+            {
+                options.EnableDetailedErrors = true;
 
+            });
 
+            services.AddHttpContextAccessor();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -82,13 +84,14 @@ namespace Hermes
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseHttpsRedirection();
 
+            app.UseRouting();
+            
+            app.UseAuthorization();
 
             app.UseIdentityServer();
-            app.UseRouting();
-            app.UseAuthentication();
 
-            app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapGrpcService<ChatterService>().RequireAuthorization("secureHermes");

@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Authorization;
 
 namespace Hermes.Services
@@ -26,7 +27,8 @@ namespace Hermes.Services
         public override async Task Chat(IAsyncStreamReader<SendRequest> requestStream,
             IServerStreamWriter<ChatReply> responseStream, ServerCallContext context)
         {
-            var name = context.RequestHeaders.FirstOrDefault(x => x.Key.Equals("name"))?.Value;
+            var name   = context.GetHttpContext().User.GetDisplayName();
+
 
             var connectionId = context.GetHttpContext().Connection.Id;
             _logger.LogInformation($"Connection id: {connectionId}");
