@@ -1,9 +1,15 @@
-﻿using Hermes.Services;
+﻿using System.Net;
+using System.Net.Http;
+using Hermes.IdentityServer;
+using Hermes.Services;
+using IdentityServer4.AccessTokenValidation;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Logging;
 
 namespace Hermes
 {
@@ -18,6 +24,54 @@ namespace Hermes
                 options.EnableDetailedErrors = true;
 
             });
+
+
+
+            services.AddAuthentication
+            (o =>
+            {
+                o.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                o.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                o.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+                .AddIdentityServerAuthentication(JwtBearerDefaults.AuthenticationScheme, options =>
+                {
+                    options.Authority = "https://localhost:7001/";
+                    options.RequireHttpsMetadata = true;
+                    IdentityModelEventSource.ShowPII = true;
+                    
+
+                    options.JwtBackChannelHandler = new HttpClientHandler
+                    {
+                        ServerCertificateCustomValidationCallback =
+                            delegate { return true; }
+                    };
+                });
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("secureHermes", policy =>
+                {
+                    policy.RequireClaim("scope", "hermes");
+                });
+            });
+
+            services.AddIdentityServer(options =>
+            {
+                options.Events.RaiseErrorEvents = true;
+                options.Events.RaiseSuccessEvents = true;
+                options.Events.RaiseFailureEvents = true;
+                options.Events.RaiseInformationEvents = true;
+
+            })
+                .AddInMemoryApiResources(Config.GetApiResources())
+                .AddSigningCredential(Cert.Get("Server.pfx", "GuwyTUzzDDh3UCaCmuLk"))
+                .AddInMemoryClients(Config.GetClients())
+                .AddInMemoryApiScopes(Config.GetApiScopes())
+                .AddInMemoryPersistedGrants()
+                .AddTestUsers(Config.GetUsers());
+
+
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -28,12 +82,16 @@ namespace Hermes
                 app.UseDeveloperExceptionPage();
             }
 
+
+
+            app.UseIdentityServer();
             app.UseRouting();
+            app.UseAuthentication();
 
-
+            app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGrpcService<ChatterService>();
+                endpoints.MapGrpcService<ChatterService>().RequireAuthorization("secureHermes");
 
                 endpoints.MapGet("/", async context =>
                 {

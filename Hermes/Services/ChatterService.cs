@@ -6,9 +6,11 @@ using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Hermes.Services
 {
+    [Authorize(Policy = "secureHermes")]
     public class ChatterService : Chatter.ChatterBase
     {
         private readonly ILogger<ChatterService> _logger;

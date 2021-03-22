@@ -1,4 +1,6 @@
+using System.Net;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Hosting;
 
 namespace Hermes
@@ -14,7 +16,27 @@ namespace Hermes
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
+                    webBuilder.UseStartup<Startup>()
+                        .ConfigureKestrel(options =>
+                        {
+                          
+                            options.Listen(IPAddress.Any, 7001,
+                                listenOptions =>
+                                {
+                                    listenOptions.UseHttps("Server.pfx", "GuwyTUzzDDh3UCaCmuLk");
+                                    listenOptions.Protocols = HttpProtocols.Http1;
+                                });
+                         
+                            options.ListenLocalhost(5001, listenOptions =>
+                            {
+                                listenOptions.UseHttps("Server.pfx", "GuwyTUzzDDh3UCaCmuLk");
+                                listenOptions.Protocols = HttpProtocols.Http2;
+                            });
+
+                            options.Limits.MinRequestBodyDataRate = null;
+                            options.Limits.MaxRequestBodySize = null;
+                            options.Limits.MaxRequestBufferSize = null;
+                        });
                 });
     }
 }
