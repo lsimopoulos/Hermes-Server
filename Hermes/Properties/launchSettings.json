@@ -6,13 +6,23 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": "true",
-      "applicationUrl": "http://localhost:5000;https://localhost:5001"
+      "applicationUrl": "https://localhost:7001;https://localhost:5001"
     },
     "Docker": {
       "commandName": "Docker",
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
       "publishAllPorts": true,
-      "useSSL": true
+      "useSSL": true,
+      "DockerfileRunArguments": "-p 5001:5001 -p 7001:7001"
+    },
+    "WSL 2": {
+      "commandName": "WSL2",
+      "launchUrl": "https://localhost:7001",
+      "environmentVariables": {
+        "ASPNETCORE_URLS": "https://localhost:7001;https://localhost:5001",
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "distributionName": ""
     }
   }
 }

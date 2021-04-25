@@ -20,14 +20,14 @@ namespace Hermes
                         .ConfigureKestrel(options =>
                         {
                           
-                            options.Listen(IPAddress.Any, 7001,
+                            options.ListenAnyIP(7001,
                                 listenOptions =>
                                 {
                                     listenOptions.UseHttps("Server.pfx", "GuwyTUzzDDh3UCaCmuLk");
                                     listenOptions.Protocols = HttpProtocols.Http1;
                                 });
                          
-                            options.ListenLocalhost(5001, listenOptions =>
+                            options.ListenAnyIP(5001, listenOptions =>
                             {
                                 listenOptions.UseHttps("Server.pfx", "GuwyTUzzDDh3UCaCmuLk");
                                 listenOptions.Protocols = HttpProtocols.Http2;

@@ -1,13 +1,15 @@
-﻿using System.Net;
+﻿using System;
 using System.Net.Http;
-using System.Security.Cryptography.X509Certificates;
+using Hermes.Classes;
 using Hermes.IdentityServer;
 using Hermes.Services;
-using IdentityServer4.AccessTokenValidation;
+using IdentityServer4.Stores;
+using IdentityServer4.Validation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Logging;
@@ -20,6 +22,17 @@ namespace Hermes
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton<IClientStore, CustomClientStore>();
+            services.AddScoped<ClaimsHelper>();
+            services.AddSingleton<CryptoHelper>();
+            services.AddSingleton<UsersManagers>();
+
+            services.AddGrpc(options =>
+            {
+                options.EnableDetailedErrors = true;
+
+            });
+
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("secureHermes", policy =>
@@ -35,17 +48,13 @@ namespace Hermes
             o.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             o.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
         })
-            .AddIdentityServerAuthentication(JwtBearerDefaults.AuthenticationScheme, options =>
+            .AddJwtBearer(options =>
             {
                 options.Authority = "https://localhost:7001/";
-                options.RequireHttpsMetadata = true;
-                options.ApiName = "hermes";
-                options.ApiSecret = "superdupersecret";
                 IdentityModelEventSource.ShowPII = true;
 
-
-
-                options.JwtBackChannelHandler = new HttpClientHandler
+                options.Audience = "hermes";
+                options.BackchannelHttpHandler = new HttpClientHandler
                 {
                     ServerCertificateCustomValidationCallback =
                         delegate { return true; }
@@ -60,25 +69,23 @@ namespace Hermes
                 options.Events.RaiseInformationEvents = true;
 
             })
+                .AddClientStore<CustomClientStore>()
                 .AddInMemoryApiResources(Config.GetApiResources())
-                .AddSigningCredential(Cert.Get("Server.pfx", "GuwyTUzzDDh3UCaCmuLk"))
-                .AddInMemoryClients(Config.GetClients())
                 .AddInMemoryApiScopes(Config.GetApiScopes())
-                .AddInMemoryPersistedGrants()
-                .AddTestUsers(Config.GetUsers());
+                .AddResourceOwnerValidator<ResourceOwnerPasswordValidator>()
+                .AddSigningCredential(Cert.Get());
 
-            services.AddGrpc(options =>
-            {
-                options.EnableDetailedErrors = true;
 
-            });
 
             services.AddHttpContextAccessor();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
         {
+            //temporary code. it will be removed
+            serviceProvider.GetService<UsersManagers>()?.SeedDemoUsers();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -87,14 +94,14 @@ namespace Hermes
             app.UseHttpsRedirection();
 
             app.UseRouting();
-            
-            app.UseAuthorization();
 
             app.UseIdentityServer();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGrpcService<ChatterService>().RequireAuthorization("secureHermes");
+
+                endpoints.MapGrpcService<ChatterService>();
 
                 endpoints.MapGet("/", async context =>
                 {

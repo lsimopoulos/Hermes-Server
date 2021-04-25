@@ -1,40 +1,39 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using IdentityServer4;
+using IdentityModel;
 using IdentityServer4.Models;
-using IdentityServer4.Test;
 
 namespace Hermes.IdentityServer
 {
+    /// <summary>
+    /// Configuration class for Identity Server.
+    /// </summary>
     public static class Config
     {
-        /// <summary>
-        /// Configuration class for Identity Server.
-        /// </summary>
-        private static readonly List<TestUser> RegisteredUsers = new()
-        {
-            new TestUser
-            {
-                SubjectId = "1",
-                Username = "leo",
-                Password = "password"
-            },
-            new TestUser
-            {
-                SubjectId = "2",
-                Username = "test",
-                Password = "pass"
-            }
-        };
-
         /// <summary>
         ///     Get api resources.
         /// </summary>
         public static IEnumerable<ApiResource> GetApiResources()
         {
+
             return new List<ApiResource>
             {
-                new("hermes", "Hermes Chat", GetApiScopes().Select(x => x.Name).ToList())
+                new()
+                {
+                    Name = "hermes",
+                    ApiSecrets =
+                    {
+                        new Secret("magicsuperdupersecret".Sha256())
+                    },
+                    UserClaims =
+                    {
+                        JwtClaimTypes.Audience,
+                        JwtClaimTypes.Issuer,
+                        JwtClaimTypes.JwtId,
+                        JwtClaimTypes.Name
+                    },
+                    Scopes =  new List<string>(){"hermes"}
+
+                }
             };
         }
 
@@ -54,7 +53,9 @@ namespace Hermes.IdentityServer
                     {
                         new Secret("superdupersecret".Sha256())
                     },
-                    AllowedScopes = {"hermes"}
+
+                    AllowedScopes = {"hermes"},
+                    AccessTokenType = AccessTokenType.Jwt,
                 },
                 new()
                 {
@@ -70,27 +71,15 @@ namespace Hermes.IdentityServer
             };
         }
 
+        /// <summary>
+        /// Get api scopes.
+        /// </summary>
         public static IEnumerable<ApiScope> GetApiScopes()
         {
             return new List<ApiScope>
             {
                 new ("hermes")
             };
-        }
-
-
-        /// <summary>
-        ///     Get users.
-        /// </summary>
-        public static List<TestUser> GetUsers()
-        {
-            return RegisteredUsers;
-        }
-
-        public static void AddUser(TestUser user)
-        {
-            user.SubjectId = (RegisteredUsers.Count + 1).ToString();
-            RegisteredUsers.Add(user);
         }
     }
 }

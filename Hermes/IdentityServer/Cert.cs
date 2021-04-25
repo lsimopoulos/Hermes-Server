@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Hermes.IdentityServer
@@ -11,12 +10,14 @@ namespace Hermes.IdentityServer
         /// <summary>
         /// returns the loaded certificate.
         /// </summary>
-        /// <param name="certificateName"> certificate name with the ending</param>
-        /// <param name="password">the password</param>
-        public static X509Certificate2 Get(string certificateName, string password)
+        ///// <param name="certificateName"> certificate name with the ending</param>
+        ///// <param name="password">the password</param>
+        public static X509Certificate2 Get()
         {
+            //find better solution for handling the hardcoded strings
+            var certificateName = "Server.pfx";
             using var stream = File.OpenRead(certificateName);
-            return new X509Certificate2(ReadStream(stream), password);
+            return new X509Certificate2(ReadStream(stream), "GuwyTUzzDDh3UCaCmuLk");
         }
 
         /// <summary>
