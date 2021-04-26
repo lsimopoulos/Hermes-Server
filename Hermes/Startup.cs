@@ -4,12 +4,10 @@ using Hermes.Classes;
 using Hermes.IdentityServer;
 using Hermes.Services;
 using IdentityServer4.Stores;
-using IdentityServer4.Validation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Logging;
@@ -32,7 +30,7 @@ namespace Hermes
                 options.EnableDetailedErrors = true;
 
             });
-
+          
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("secureHermes", policy =>
@@ -78,14 +76,12 @@ namespace Hermes
 
 
             services.AddHttpContextAccessor();
+            services.AddControllers();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            //temporary code. it will be removed
-            serviceProvider.GetService<UsersManagers>()?.SeedDemoUsers();
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -100,7 +96,7 @@ namespace Hermes
 
             app.UseEndpoints(endpoints =>
             {
-
+                endpoints.MapControllers();
                 endpoints.MapGrpcService<ChatterService>();
 
                 endpoints.MapGet("/", async context =>
