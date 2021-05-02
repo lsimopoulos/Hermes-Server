@@ -66,7 +66,8 @@ namespace Hermes.IdentityServer
                     {
                         new Secret("websuperdupersecret".Sha256())
                     },
-                    AllowedScopes = {"hermes"}
+                    AllowedScopes = {"hermes"},
+                    AccessTokenType = AccessTokenType.Jwt,
                 }
             };
         }
