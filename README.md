@@ -7,7 +7,7 @@ A  chat server implemented with [gRPC](https://grpc.io) in [.NET](https://dotnet
 ## How to run ##
 
 ### Docker ###
-In  the root  of repo folder and enter the following commands:
+In  the root  of repo folder enter the following commands:
 
 ```
  docker build -f Hermes\Dockerfile --tag hermes-server .
