@@ -42,6 +42,10 @@ namespace Hermes.Services
                     if (string.IsNullOrEmpty(requestStream.Current.Message)) continue;
                     foreach (var chatSubscription in ChatSubscriptions)
                     {
+                        
+                        //for debugging reasons TODO remove it
+                        _logger.LogInformation($" the user:  {name} sent the message : {requestStream.Current.Message}");
+
                         if (chatSubscription.Key != connectionId)
                             await chatSubscription.Value.WriteAsync(new ChatReply
                             {
