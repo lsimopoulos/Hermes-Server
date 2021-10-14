@@ -20,6 +20,7 @@ namespace Hermes
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors();
             services.AddSingleton<IClientStore, CustomClientStore>();
             services.AddScoped<ClaimsHelper>();
             services.AddSingleton<CryptoHelper>();
@@ -87,12 +88,21 @@ namespace Hermes
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseCors(policy =>
+            {
+                policy.AllowAnyHeader();
+                policy.AllowAnyMethod();
+                policy.AllowCredentials();
+                policy.SetIsOriginAllowed(_ => true);
+            });
+
+
             app.UseHttpsRedirection();
 
             app.UseRouting();
-
             app.UseIdentityServer();
             app.UseAuthorization();
+
 
             app.UseEndpoints(endpoints =>
             {
