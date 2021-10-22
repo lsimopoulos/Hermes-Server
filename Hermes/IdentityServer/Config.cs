@@ -67,7 +67,11 @@ namespace Hermes.IdentityServer
                         new Secret("websuperdupersecret".Sha256())
                     },
                     AllowedScopes = {"hermes"},
+                    AllowOfflineAccess = true,
+                    RefreshTokenUsage = TokenUsage.ReUse,
                     AccessTokenType = AccessTokenType.Jwt,
+                    AllowedCorsOrigins = { "https://localhost:55555" },
+
                 }
             };
         }
