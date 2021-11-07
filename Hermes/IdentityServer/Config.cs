@@ -68,7 +68,7 @@ namespace Hermes.IdentityServer
                     },
                     AllowedScopes = {"hermes"},
                     AllowOfflineAccess = true,
-                    RefreshTokenUsage = TokenUsage.ReUse,
+                    RefreshTokenUsage = TokenUsage.OneTimeOnly,
                     AccessTokenType = AccessTokenType.Jwt,
                     AllowedCorsOrigins = { "https://localhost:55555" },
 
