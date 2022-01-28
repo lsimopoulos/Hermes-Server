@@ -61,7 +61,6 @@ namespace Hermes.IdentityServer
                 {
                     ClientId = "chat_web_client",
                     AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
-
                     ClientSecrets =
                     {
                         new Secret("websuperdupersecret".Sha256())
@@ -70,7 +69,7 @@ namespace Hermes.IdentityServer
                     AllowOfflineAccess = true,
                     RefreshTokenUsage = TokenUsage.OneTimeOnly,
                     AccessTokenType = AccessTokenType.Jwt,
-                    AllowedCorsOrigins = { "https://localhost:55555" },
+                    AllowedCorsOrigins = new[]{ "https://localhost:55555"  },
 
                 }
             };
