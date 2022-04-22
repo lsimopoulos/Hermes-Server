@@ -93,13 +93,14 @@ namespace Hermes
                 policy.AllowAnyHeader();
                 policy.AllowAnyMethod();
                 policy.AllowCredentials();
+                policy.WithExposedHeaders("Grpc-Status", "Grpc-Message", "Grpc-Encoding", "Grpc-Accept-Encoding");
                 policy.SetIsOriginAllowed(_ => true);
             });
-
 
             app.UseHttpsRedirection();
 
             app.UseRouting();
+            app.UseGrpcWeb(new GrpcWebOptions { DefaultEnabled = true });
             app.UseIdentityServer();
             app.UseAuthorization();
 
@@ -107,7 +108,7 @@ namespace Hermes
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapGrpcService<ChatterService>();
+                endpoints.MapGrpcService<ChatterService>().EnableGrpcWeb();
 
                 endpoints.MapGet("/", async context =>
                 {
