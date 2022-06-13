@@ -24,7 +24,7 @@ namespace Hermes
                                 listenOptions =>
                                 {
                                     listenOptions.UseHttps("Server.pfx", "GuwyTUzzDDh3UCaCmuLk");
-                                    listenOptions.Protocols = HttpProtocols.Http2;
+                                    listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
                                 });
                          
                             options.ListenAnyIP(5001, listenOptions =>

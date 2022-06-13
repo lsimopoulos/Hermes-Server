@@ -1,10 +1,7 @@
-﻿using System;
-using System.Linq;
-using System.Net.Http;
+﻿using System.Net.Http;
 using Hermes.Classes;
 using Hermes.IdentityServer;
 using Hermes.Services;
-using IdentityServer4.Services;
 using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -12,7 +9,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Logging;
 
 namespace Hermes
@@ -72,6 +68,7 @@ namespace Hermes
             services.AddScoped<ClaimsHelper>();
             services.AddSingleton<CryptoHelper>();
             services.AddSingleton<UsersManagers>();
+            services.AddSingleton<ChatManager>();
 
 
             services.AddGrpc(options =>

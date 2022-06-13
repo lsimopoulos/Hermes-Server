@@ -1,5 +1,5 @@
 syntax = "proto3";
-
+import "google/protobuf/empty.proto";
 option csharp_namespace = "Hermes.Protos";
 
 package chat;
@@ -8,20 +8,23 @@ package chat;
 service Chatter {
 	//Chat a text message
 	//rpc streamChat(stream SendRequest) returns (stream ChatReply);
-	rpc chat(SendRequest) returns (stream ChatReply);
+	rpc chat(SendRequest) returns (google.protobuf.Empty);
+	rpc connect(google.protobuf.Empty) returns (stream ChatReply);
 }
 
 // The request message containing the  message.
 message SendRequest {
 	string message = 1;
 	string time = 2;
+	string to = 3;
 }
+
 
 
 // The response message containing the message.
 message ChatReply {
 	string message = 1;
 	string time = 2;
-	string name = 3;
-	bool sent = 4;
+	string from = 3;
+	string to = 4;
 }
