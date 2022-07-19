@@ -29,7 +29,8 @@ namespace Hermes.IdentityServer
                         JwtClaimTypes.Audience,
                         JwtClaimTypes.Issuer,
                         JwtClaimTypes.JwtId,
-                        JwtClaimTypes.Name
+                        JwtClaimTypes.Name,
+                        "extid"
                     },
                     Scopes =  new List<string>(){"hermes"}
 

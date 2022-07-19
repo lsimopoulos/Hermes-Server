@@ -18,41 +18,63 @@ namespace Hermes.Services
     {
         private readonly ILogger<ChatterService> _logger;
         private readonly ChatManager _chatManager;
+        private readonly UsersManagers _usersManager;
 
 
-        public ChatterService(ILogger<ChatterService> logger, ChatManager chatManager)
+        public ChatterService(ILogger<ChatterService> logger, ChatManager chatManager, UsersManagers userManager)
         {
             _logger = logger;
             _chatManager = chatManager;
+            _usersManager = userManager;
         }
 
         public override Task connect(Empty request, IServerStreamWriter<ChatReply> responseStream, ServerCallContext context)
         {
-            var name = context.GetHttpContext().User.Claims.FirstOrDefault(x => x.Type == "name")?.Value;
+            var ext_id = context.GetHttpContext().User.Claims.FirstOrDefault(x => x.Type == "extid")?.Value;
 
             try
             {
-                _chatManager.Suscribe(name, responseStream);
+                _chatManager.Suscribe(ext_id, responseStream);
                 while (!context.CancellationToken.IsCancellationRequested)
                 {
 
                 }
-                _chatManager.UnSuscribe(name);
+                _chatManager.UnSuscribe(ext_id);
 
             }
             catch (Exception)
             {
-                _chatManager.UnSuscribe(name);
+                _chatManager.UnSuscribe(ext_id);
             }
             return Task.CompletedTask;
         }
         public override Task<Empty> chat(SendRequest sendRequest, ServerCallContext context)
         {
-            var name = context.GetHttpContext().User.Claims.FirstOrDefault(x => x.Type == "name")?.Value;
-            var chatReply = new ChatReply { Message = sendRequest.Message, Time = sendRequest.Time, From = name };
+            var externalId = context.GetHttpContext().User.Claims.FirstOrDefault(x => x.Type == "extid")?.Value;
+            var chatReply = new ChatReply { Message = sendRequest.Message, Time = sendRequest.Time, From = sendRequest.From, To = sendRequest.To };
             _chatManager.AddMessage(chatReply);
             return Task.FromResult(new Empty());
         }
+        public override Task<GetContactsReply> getContacts(Empty request, ServerCallContext context)
+        {
+            var externalId = context.GetHttpContext().User.Claims.FirstOrDefault(x => x.Type == "extid")?.Value;
+            var contacts = _usersManager.GetContacts(externalId);
+            var reply = new GetContactsReply();
+            reply.Contacts.AddRange(contacts);
+            return Task.FromResult(reply);
+        }
+
+        public override Task<Contact> addContact(AddContactRequest request, ServerCallContext context)
+        {
+            if(Guid.TryParse(context.GetHttpContext().User.Claims.FirstOrDefault(x => x.Type == "extid")?.Value, out var externalId))
+            {
+                var ret = _usersManager.AddContact(externalId, request);
+                return Task.FromResult(ret);
+
+            }
+            return null;
+        }
+      
     }
 
 

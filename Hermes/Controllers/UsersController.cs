@@ -2,6 +2,8 @@
 using System.Threading.Tasks;
 using Hermes.Classes;
 using IdentityServer4.Test;
+using Hermes.Models;
+using System;
 
 namespace Hermes.Controllers
 {
@@ -18,10 +20,10 @@ namespace Hermes.Controllers
 
         [HttpPost]
         [Route("Register")]
-        public  ActionResult Register([FromBody] TestUser testUser)
+        public ActionResult Register([FromBody] HermesUser testUser)
         {
-              _usersManagers.AddUser(testUser);
-             return Ok();
+            _usersManagers.AddUser(testUser);
+            return Ok();
         }
     }
 }
