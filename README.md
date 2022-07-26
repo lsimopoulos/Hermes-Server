@@ -10,12 +10,12 @@ A  chat server implemented with [gRPC](https://grpc.io) in [.NET](https://dotnet
 
 Client
 ```
- docker run -it --name hermes-client leonidassim/hermes-client -p 5555:443
+ docker run -it  -p 5555:443 --name hermes-client leonidassim/hermes-client
 ```
 
 Server
 ```
- docker run -it --name hermes leonidassim/hermes-server -p 5001:5001 -p 7001:7001
+ docker run -it  -p 5001:5001 -p 7001:7001 --name hermes leonidassim/hermes-server 
 ```
 
 #### Note ####
