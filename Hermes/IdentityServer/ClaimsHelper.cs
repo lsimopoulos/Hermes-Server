@@ -15,7 +15,7 @@ namespace Hermes.IdentityServer
         {
             var claims = new List<Claim>
             {
-             new Claim("extid",user.ExternalId.ToString())
+             new Claim("id",user.Id.ToString())
             };
 
             return claims;

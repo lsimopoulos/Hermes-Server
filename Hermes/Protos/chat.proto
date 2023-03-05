@@ -12,6 +12,7 @@ service Chatter {
 	rpc connect(google.protobuf.Empty) returns (stream ChatReply);
 	rpc getContacts(google.protobuf.Empty) returns (GetContactsReply);
 	rpc addContact(AddContactRequest) returns (Contact);
+	rpc addGroup(AddGroupRequest) returns (Contact);
 }
 
 // The request message containing the  message.
@@ -26,6 +27,13 @@ message AddContactRequest {
 	string  email = 1;
 }
 
+message AddGroupRequest {
+	string  name = 1;
+	repeated GroupMember members = 2;
+}
+message GroupMember {
+	string id =1;
+}
 
 // The response message containing the message.
 message ChatReply {
@@ -33,6 +41,7 @@ message ChatReply {
 	string time = 2;
 	string from = 3;
 	string to = 4;
+	optional string groupid = 5;
 }
 
 message GetContactsReply {
@@ -43,6 +52,7 @@ message Contact {
 	string id =1;
 	string name = 2;
 	string email = 3;
+	bool isGroup = 4;
 }
 message ContactsReply {
 	string id =1;

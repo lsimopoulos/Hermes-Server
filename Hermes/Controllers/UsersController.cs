@@ -22,7 +22,8 @@ namespace Hermes.Controllers
         [Route("Register")]
         public ActionResult Register([FromBody] HermesUser testUser)
         {
-            _usersManagers.AddUser(testUser);
+            if (! _usersManagers.AddUser(testUser))
+                return BadRequest("The user aldready exists");
             return Ok();
         }
     }

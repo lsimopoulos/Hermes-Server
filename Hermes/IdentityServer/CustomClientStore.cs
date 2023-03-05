@@ -9,7 +9,7 @@ namespace Hermes.IdentityServer
     {
         public Task<Client> FindClientByIdAsync(string clientId)
         {
-           return Task.FromResult(Config.GetClients().FirstOrDefault(x => x.ClientId == clientId));
+           return Task.FromResult(Config.GetClients().Where(x => x.ClientId == clientId).FirstOrDefault());
         }
     }
 }

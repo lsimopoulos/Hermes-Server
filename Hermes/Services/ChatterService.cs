@@ -2,14 +2,15 @@
 using Hermes.Protos;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Concurrent;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using IdentityServer4.AccessTokenValidation;
 using Microsoft.AspNetCore.Authorization;
 using Google.Protobuf.WellKnownTypes;
 using Hermes.Classes;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 
 namespace Hermes.Services
 {
@@ -20,7 +21,6 @@ namespace Hermes.Services
         private readonly ChatManager _chatManager;
         private readonly UsersManagers _usersManager;
 
-
         public ChatterService(ILogger<ChatterService> logger, ChatManager chatManager, UsersManagers userManager)
         {
             _logger = logger;
@@ -28,36 +28,59 @@ namespace Hermes.Services
             _usersManager = userManager;
         }
 
-        public override Task connect(Empty request, IServerStreamWriter<ChatReply> responseStream, ServerCallContext context)
+        public override async Task connect(Empty request, IServerStreamWriter<ChatReply> responseStream, ServerCallContext context)
         {
-            var ext_id = context.GetHttpContext().User.Claims.FirstOrDefault(x => x.Type == "extid")?.Value;
-
-            try
+            var hehe = context.GetHttpContext().User;
+            if (Guid.TryParse(context.GetHttpContext().User.Claims.Where(static x => x.Type == ClaimTypes.NameIdentifier).FirstOrDefault()?.Value, out var ext_id))
             {
                 _chatManager.Suscribe(ext_id, responseStream);
-                while (!context.CancellationToken.IsCancellationRequested)
+              
+                try
                 {
-
+                    await Task.Delay(-1, context.CancellationToken);
                 }
-                _chatManager.UnSuscribe(ext_id);
-
+                catch (TaskCanceledException)
+                {
+                    _chatManager.UnSuscribe(ext_id);
+                }
+                catch (Exception)
+                {
+                    _chatManager.UnSuscribe(ext_id);
+                }
             }
-            catch (Exception)
-            {
-                _chatManager.UnSuscribe(ext_id);
-            }
-            return Task.CompletedTask;
         }
-        public override Task<Empty> chat(SendRequest sendRequest, ServerCallContext context)
+        public override Task<Contact> addGroup(AddGroupRequest request, ServerCallContext context)
         {
-            var externalId = context.GetHttpContext().User.Claims.FirstOrDefault(x => x.Type == "extid")?.Value;
-            var chatReply = new ChatReply { Message = sendRequest.Message, Time = sendRequest.Time, From = sendRequest.From, To = sendRequest.To };
-            _chatManager.AddMessage(chatReply);
-            return Task.FromResult(new Empty());
+            if (_usersManager.TryAddGroup(request,Guid.NewGuid(), out var group))
+            {
+                return Task.FromResult(group);
+            }
+
+
+            throw new RpcException(new Status(StatusCode.Internal, "Group was not created"));
+        }
+
+        public override async Task<Empty> chat(SendRequest sendRequest, ServerCallContext context)
+        {
+            if (_usersManager.CheckIfGroup(sendRequest.To))
+            {
+                var messages = _usersManager.GetMessagesForGroup(sendRequest);
+                foreach (var msg in messages)
+                {
+                    await _chatManager.AddMessage(msg);
+                }
+            }
+            else
+            {
+                var chatReply = new ChatReply { Message = sendRequest.Message, Time = sendRequest.Time, From = sendRequest.From, To = sendRequest.To };
+                await _chatManager.AddMessage(chatReply);
+            }
+
+            return new Empty();
         }
         public override Task<GetContactsReply> getContacts(Empty request, ServerCallContext context)
         {
-            var externalId = context.GetHttpContext().User.Claims.FirstOrDefault(x => x.Type == "extid")?.Value;
+            var externalId = context.GetHttpContext().User.Claims.Where(static x => x.Type == ClaimTypes.NameIdentifier).FirstOrDefault()?.Value;
             var contacts = _usersManager.GetContacts(externalId);
             var reply = new GetContactsReply();
             reply.Contacts.AddRange(contacts);
@@ -66,15 +89,20 @@ namespace Hermes.Services
 
         public override Task<Contact> addContact(AddContactRequest request, ServerCallContext context)
         {
-            if(Guid.TryParse(context.GetHttpContext().User.Claims.FirstOrDefault(x => x.Type == "extid")?.Value, out var externalId))
+            if (Guid.TryParse(context.GetHttpContext().User.Claims.Where(static x => x.Type == ClaimTypes.NameIdentifier).FirstOrDefault()?.Value, out var externalId))
             {
                 var ret = _usersManager.AddContact(externalId, request);
+                if (ret == null)
+                {
+                    throw new RpcException(new Status(StatusCode.NotFound, "Email was not found in the server"));
+                }
+
                 return Task.FromResult(ret);
 
             }
             return null;
         }
-      
+
     }
 
 

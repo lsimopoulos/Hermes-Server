@@ -9,7 +9,10 @@ namespace Hermes
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            CreateHostBuilder(args)
+                .Build()
+                .MigrateDatabase()
+                .Run();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
@@ -27,7 +30,7 @@ namespace Hermes
                                     listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
                                 });
                          
-                            options.ListenAnyIP(5001, listenOptions =>
+                            options.ListenAnyIP(55556, listenOptions =>
                             {
                                 listenOptions.UseHttps("Server.pfx", "GuwyTUzzDDh3UCaCmuLk");
                                 listenOptions.Protocols = HttpProtocols.Http2;

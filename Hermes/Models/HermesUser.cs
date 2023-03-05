@@ -1,27 +1,22 @@
 ﻿using IdentityServer4.Test;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Hermes.Models
 {
-    public class HermesUser : TestUser
+    public class HermesUser : IdentityUser<Guid>
     {
         public HermesUser()
         {
-            ExternalId = Guid.NewGuid();
-            SubjectId = Guid.NewGuid().ToString();
+            Id = Guid.NewGuid();
         }
-
-        public HermesUser(HermesUser user)
-        {
-            ExternalId = user.ExternalId;
-            SubjectId = user.SubjectId;
-            Username = user.Username;
-            Name = user.Name+ " (me)";
-        }
-        public Guid ExternalId { get; }
-        public ICollection<HermesUser> Contacts { get; set; } = new HashSet<HermesUser>();
-        public ICollection<Group> Groups { get; set; } = new HashSet<Group>();
+        public bool IsGroup { get; set; }
+        public virtual ICollection<HermesUser> Contacts { get; set; } = new HashSet<HermesUser>();
+        public virtual ICollection<HermesUser> Groups { get; set; } = new HashSet<HermesUser>();
         public string Name { get; set; }
+        [NotMapped]
+        public string Password { get; set; }
     }
 }
