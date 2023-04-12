@@ -8,8 +8,6 @@ using IdentityServer4.AccessTokenValidation;
 using Microsoft.AspNetCore.Authorization;
 using Google.Protobuf.WellKnownTypes;
 using Hermes.Classes;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 
 namespace Hermes.Services
@@ -62,47 +60,40 @@ namespace Hermes.Services
 
         public override async Task<Empty> chat(SendRequest sendRequest, ServerCallContext context)
         {
-            if (_usersManager.CheckIfGroup(sendRequest.To))
+            if (await _usersManager.CheckIfGroupAsync(sendRequest.To))
             {
                 var messages = _usersManager.GetMessagesForGroup(sendRequest);
                 foreach (var msg in messages)
                 {
-                    await _chatManager.AddMessage(msg);
+                    await _chatManager.AddMessageAsync(msg);
                 }
             }
             else
             {
                 var chatReply = new ChatReply { Message = sendRequest.Message, Time = sendRequest.Time, From = sendRequest.From, To = sendRequest.To };
-                await _chatManager.AddMessage(chatReply);
+                await _chatManager.AddMessageAsync(chatReply);
             }
 
             return new Empty();
         }
-        public override Task<GetContactsReply> getContacts(Empty request, ServerCallContext context)
+        public override  async Task<GetContactsReply> getContacts(Empty request, ServerCallContext context)
         {
-            var externalId = context.GetHttpContext().User.Claims.Where(static x => x.Type == ClaimTypes.NameIdentifier).FirstOrDefault()?.Value;
-            var contacts = _usersManager.GetContacts(externalId);
+            var externalId =  context.GetHttpContext().User.Claims.Where(static x => x.Type == ClaimTypes.NameIdentifier).FirstOrDefault()?.Value;
+            var contacts =  await _usersManager.GetContactsAsync(externalId);
             var reply = new GetContactsReply();
             reply.Contacts.AddRange(contacts);
-            return Task.FromResult(reply);
+            return reply;
         }
 
-        public override Task<Contact> addContact(AddContactRequest request, ServerCallContext context)
+        public override async Task<Contact> addContact(AddContactRequest request, ServerCallContext context)
         {
             if (Guid.TryParse(context.GetHttpContext().User.Claims.Where(static x => x.Type == ClaimTypes.NameIdentifier).FirstOrDefault()?.Value, out var externalId))
             {
-                var ret = _usersManager.AddContact(externalId, request);
-                if (ret == null)
-                {
-                    throw new RpcException(new Status(StatusCode.NotFound, "Email was not found in the server"));
-                }
-
-                return Task.FromResult(ret);
-
+                var ret = await _usersManager.AddContactAsync(externalId, request, context.CancellationToken);
+                return ret ?? throw new RpcException(new Status(StatusCode.NotFound, "Email was not found in the server"));
             }
             return null;
         }
-
     }
 
 

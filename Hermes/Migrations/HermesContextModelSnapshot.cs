@@ -231,7 +231,7 @@ namespace Hermes.Migrations
 
                     b.HasIndex("ContactId");
 
-                    b.ToTable("HermesUserContacts");
+                    b.ToTable("HermesUserContacts", (string)null);
 
                     b.HasData(
                         new
@@ -423,7 +423,7 @@ namespace Hermes.Migrations
 
                     b.HasIndex("GroupId");
 
-                    b.ToTable("HermesUserGroups");
+                    b.ToTable("HermesUserGroups", (string)null);
 
                     b.HasData(
                         new

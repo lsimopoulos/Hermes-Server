@@ -17,9 +17,9 @@ namespace Hermes.Classes
         }
         public async Task SaveMessage(ChatReply chatReply, Guid senderId)
         {
-            var receiverId = _hermesContext.Users.Where(x => string.Equals(x.UserName, chatReply.To)).Select(x => x.Id).FirstOrDefault();
+            var receiverId =  (await _hermesContext.Users.FindAsync(Guid.Parse(chatReply.To))).Id;
             var hermesMessage = new HermesMessage { Message = chatReply.Message, SenderId = senderId, GroupId = chatReply.HasGroupid ? Guid.Parse(chatReply.Groupid) : null, ReceiverId = receiverId, Time = DateTimeOffset.Parse(chatReply.Time) };
-            _hermesContext.HermesMessages.Add(hermesMessage);
+            _hermesContext.Add(hermesMessage);
             await _hermesContext.SaveChangesAsync();
         }
     }

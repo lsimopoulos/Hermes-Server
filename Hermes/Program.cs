@@ -1,7 +1,11 @@
+using System.Configuration;
 using System.Net;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Configuration;
+using Serilog;
 
 namespace Hermes
 {
@@ -9,6 +13,7 @@ namespace Hermes
     {
         public static void Main(string[] args)
         {
+
             CreateHostBuilder(args)
                 .Build()
                 .MigrateDatabase()
@@ -22,14 +27,14 @@ namespace Hermes
                     webBuilder.UseStartup<Startup>()
                         .ConfigureKestrel(options =>
                         {
-                          
+
                             options.ListenAnyIP(7001,
                                 listenOptions =>
                                 {
                                     listenOptions.UseHttps("Server.pfx", "GuwyTUzzDDh3UCaCmuLk");
                                     listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
                                 });
-                         
+
                             options.ListenAnyIP(55556, listenOptions =>
                             {
                                 listenOptions.UseHttps("Server.pfx", "GuwyTUzzDDh3UCaCmuLk");
@@ -40,6 +45,11 @@ namespace Hermes
                             options.Limits.MaxRequestBodySize = null;
                             options.Limits.MaxRequestBufferSize = null;
                         });
-                });
+                })
+            .UseSerilog((context, services, configuration) => configuration
+                .ReadFrom.Configuration(context.Configuration)
+                .ReadFrom.Services(services)
+                .Enrich.FromLogContext()
+                .WriteTo.Console());
     }
 }

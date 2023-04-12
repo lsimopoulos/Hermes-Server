@@ -61,7 +61,7 @@ namespace Hermes.Classes
             PrintActiveThreads();
 
         }
-        public async Task AddMessage(ChatReply chatReply)
+        public async Task AddMessageAsync(ChatReply chatReply)
         {
             if (Guid.TryParse(chatReply.To, out var receiverGuid) && Guid.TryParse(chatReply.From, out var fromGuid))
             {

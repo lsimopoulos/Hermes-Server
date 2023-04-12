@@ -4,6 +4,7 @@ using Hermes.Classes;
 using IdentityServer4.Test;
 using Hermes.Models;
 using System;
+using System.Threading;
 
 namespace Hermes.Controllers
 {
@@ -20,9 +21,10 @@ namespace Hermes.Controllers
 
         [HttpPost]
         [Route("Register")]
-        public ActionResult Register([FromBody] HermesUser testUser)
+        public async Task<ActionResult> Register([FromBody] HermesUser testUser)
         {
-            if (! _usersManagers.AddUser(testUser))
+            var cancellationTokenSource = new CancellationTokenSource();
+            if (!await _usersManagers.AddUserAsync(testUser, cancellationTokenSource.Token))
                 return BadRequest("The user aldready exists");
             return Ok();
         }
