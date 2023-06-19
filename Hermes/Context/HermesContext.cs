@@ -3,13 +3,8 @@ using Hermes.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net.Sockets;
-using System.Reflection.Emit;
 
 namespace Hermes.Context
 {
@@ -41,16 +36,15 @@ namespace Hermes.Context
             //builder.Entity<IdentityUserLogin<Guid>>().HasNoKey().ToTable("HermesUserLogins");
             //builder.Entity<IdentityUserToken<Guid>>().ToTable("HermesUserTokens");
 
-          
+
 
 
 
             builder.ApplyConfiguration(new HermesUsersConfiguration());
             builder.ApplyConfiguration(new HermesMessagesConfiguration());
-
             SeedUsersAndContacts.Seed(builder);
 
         }
-        public ICollection<HermesMessage> HermesMessages { get; set; }
+        public DbSet<HermesMessage> HermesMessages { get; set; }
     }
 }

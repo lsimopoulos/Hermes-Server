@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Hermes.Models;
+using System.Collections.Generic;
 using System.Security.Claims;
-using Hermes.Models;
-using IdentityServer4.Test;
 
 namespace Hermes.IdentityServer
 {

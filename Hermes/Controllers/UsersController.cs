@@ -1,10 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
-using Hermes.Classes;
-using IdentityServer4.Test;
+﻿using Hermes.Classes;
 using Hermes.Models;
-using System;
+using Microsoft.AspNetCore.Mvc;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Hermes.Controllers
 {

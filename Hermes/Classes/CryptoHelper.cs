@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Hermes.IdentityServer;
+using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using Hermes.IdentityServer;
 
 namespace Hermes.Classes
 {

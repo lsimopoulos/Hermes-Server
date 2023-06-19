@@ -1,14 +1,9 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Hermes.Classes;
-using Hermes.Context;
-using Hermes.Models;
+﻿using Hermes.Models;
 using IdentityModel;
 using IdentityServer4.Models;
 using IdentityServer4.Validation;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace Hermes.IdentityServer
 {

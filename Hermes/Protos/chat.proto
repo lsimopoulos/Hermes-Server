@@ -9,7 +9,9 @@ service Chatter {
 	//Chat a text message
 	//rpc streamChat(stream SendRequest) returns (stream ChatReply);
 	rpc chat(SendRequest) returns (google.protobuf.Empty);
-	rpc connect(google.protobuf.Empty) returns (stream ChatReply);
+	rpc sendIsTyping(ChatStatus) returns (google.protobuf.Empty);
+	rpc connectMessages(google.protobuf.Empty) returns (stream ChatReply);
+	rpc connectStatus(google.protobuf.Empty) returns (stream ChatStatus);
 	rpc getContacts(google.protobuf.Empty) returns (GetContactsReply);
 	rpc addContact(AddContactRequest) returns (Contact);
 	rpc addGroup(AddGroupRequest) returns (Contact);
@@ -44,6 +46,12 @@ message ChatReply {
 	optional string groupid = 5;
 }
 
+message ChatStatus {
+	string from = 1;
+	optional bool isTyping = 2;
+	optional bool isOnline = 3;
+	optional string to = 4;
+}
 message GetContactsReply {
 	repeated Contact contacts = 1;
 }
@@ -53,6 +61,7 @@ message Contact {
 	string name = 2;
 	string email = 3;
 	bool isGroup = 4;
+	bool isOnline = 5;
 }
 message ContactsReply {
 	string id =1;
