@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Net.Http;
-using Hermes.Classes;
+﻿using Hermes.Classes;
 using Hermes.Context;
 using Hermes.IdentityServer;
 using Hermes.Models;
@@ -11,7 +8,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -20,6 +16,9 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Logging;
 using Serilog;
+using System;
+using System.IO;
+using System.Net.Http;
 
 namespace Hermes
 {
@@ -103,7 +102,7 @@ namespace Hermes
             services.AddSingleton<IClientStore, CustomClientStore>();
             services.AddScoped<ClaimsHelper>();
             services.AddSingleton<CryptoHelper>();
-            services.AddScoped<UsersManagers>();
+            services.AddSingleton<UsersManagers>();
             services.AddScoped<DatabaseMessageWritter>();
             services.AddSingleton<ChatManager>();
 
@@ -122,14 +121,6 @@ namespace Hermes
                     policy.RequireClaim("scope", "hermes");
                 });
             });
-
-            services.Configure<FormOptions>(o =>
-            {
-                o.ValueLengthLimit = int.MaxValue;
-                o.MultipartBodyLengthLimit = int.MaxValue;
-                o.MemoryBufferThreshold = int.MaxValue;
-            });
-
 
             services.AddHttpContextAccessor();
 
@@ -157,11 +148,6 @@ namespace Hermes
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-            app.UseStaticFiles(new StaticFileOptions()
-            {
-                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"Resources")),
-                RequestPath = new PathString("/Resources")
-            });
             app.UseRouting();
             app.UseGrpcWeb(new GrpcWebOptions { DefaultEnabled = true });
             app.UseIdentityServer();

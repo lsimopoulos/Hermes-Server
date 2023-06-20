@@ -1,5 +1,4 @@
-﻿using Google.Protobuf;
-using Grpc.Core;
+﻿using Grpc.Core;
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
@@ -39,10 +38,10 @@ namespace Hermes.Classes
             {
                 await _receiver.WriteAsync(message, cts.Token);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
 
-                throw;
+                throw ex;
             }
 
         }

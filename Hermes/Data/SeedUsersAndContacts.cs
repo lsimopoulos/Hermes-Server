@@ -29,7 +29,7 @@ namespace Hermes.Data
                 SecurityStamp = Guid.NewGuid().ToString(),
                 IsGroup = true,
             };
-           
+
 
             builder.Entity<HermesUser>().HasData(testGroup);
 

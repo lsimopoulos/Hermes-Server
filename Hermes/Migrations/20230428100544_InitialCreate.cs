@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 #nullable disable
 
@@ -37,6 +37,7 @@ namespace Hermes.Migrations
                     ReceiverId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     GroupId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Message = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Delivered = table.Column<bool>(type: "bit", nullable: false),
                     Time = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>
@@ -228,12 +229,12 @@ namespace Hermes.Migrations
                 columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "IsGroup", "LockoutEnabled", "LockoutEnd", "Name", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
                 values: new object[,]
                 {
-                    { new Guid("0012d980-ef0b-4b95-80f6-3d7079f2c7ea"), 0, "6cc8fc94-c3e2-4ae0-8feb-e5d321a5b508", "testGroup@haha.com", false, true, false, null, "testGroup", null, null, null, null, false, "73db1892-5227-4455-81d3-c146329c9ec3", false, "testGroup@haha.com" },
-                    { new Guid("06e5492e-bcc8-4b86-9922-04b11349aadb"), 0, "a76e0f8d-e84e-4918-858f-47a0a80a4c67", null, false, false, false, null, "haha4", null, "haha4@haha.com", "AQAAAAIAAYagAAAAEEZEmLZpDkTtKY7kDBJ+5r8omEXGGVZNRBKSBtnRG6y9bXPVFN5d9g4ATbwyhh7zIw==", null, false, "66d5570b-9283-47a0-ac5e-b896744aa521", false, "haha4@haha.com" },
-                    { new Guid("7ed880b2-2fb6-464d-af5d-1dd2f1dec54f"), 0, "93a20090-a678-43d0-86b4-c5da1411a8eb", null, false, false, false, null, "haha1", null, "haha1@haha.com", "AQAAAAIAAYagAAAAEDdR4tn/pMvITt+stWbakoNEdvUKstzJq+j1WYGEKUt1fXdVDFrgp0dRHm8IelMgzw==", null, false, "7d59f64f-68d7-4e2a-ba14-d18dce4b3329", false, "haha1@haha.com" },
-                    { new Guid("cd8dbff0-cbfe-4f6c-921c-06abb41968fb"), 0, "fd7d3e8d-2be8-49c0-bfaf-3155208dbfa8", null, false, false, false, null, "haha2", null, "haha2@haha.com", "AQAAAAIAAYagAAAAENbcIPoM6k/Uv+wzWwU0K7B9WrXMzmWR4IepPgGNJB2m7qpZiAEfuNSyjd6guTFfyA==", null, false, "c4ac2d69-4701-4692-81c0-a09077a5ed7a", false, "haha2@haha.com" },
-                    { new Guid("ea398905-831c-444b-b48f-7072dbb506c9"), 0, "0641635e-58b1-4106-83e9-a12de1814067", null, false, false, false, null, "haha3", null, "haha3@haha.com", "AQAAAAIAAYagAAAAEFer1oLsQqsK916m4sOtMxtDLXyplNAKjO/ufjZiv3K2HXmBhHkAwj9phG4DbeItNA==", null, false, "8a2265e9-4ced-480f-b200-c570a4811ba8", false, "haha3@haha.com" },
-                    { new Guid("f1ad9e71-adfa-475c-8945-0c24795624aa"), 0, "39781d67-b70e-4265-8269-e3efbf59b1ed", null, false, false, false, null, "haha0", null, "haha0@haha.com", "AQAAAAIAAYagAAAAEPPr4tGT4Z1GgopMNI5dphnFft5oTEknVmmUwfoc1Ya2l+0Yd6KpDYncOi5yrHNQog==", null, false, "6fc3c223-0273-4f85-b044-1e713346b971", false, "haha0@haha.com" }
+                    { new Guid("038da423-3391-4217-a21c-5b8ae593d52e"), 0, "a522df9b-ef72-4868-bc25-f8681f43d4ed", null, false, false, false, null, "haha3", null, "haha3@haha.com", "AQAAAAIAAYagAAAAENMCwtW/5UwYc6y/BAIFSP4LEI5jll7BaeIeLZeNtXFRNt3iT4mfy1J7MI0UlA9djg==", null, false, "7661f57b-c9c0-41d4-b318-f351024e963e", false, "haha3@haha.com" },
+                    { new Guid("2af2ada0-ad1f-4494-b038-db75d813fe07"), 0, "9a4c8fcb-6d1f-4e2a-bcd0-53a7414d929e", null, false, false, false, null, "haha0", null, "haha0@haha.com", "AQAAAAIAAYagAAAAELkUohcH2NYpJCrDnTp2IhAnmUZgCWDDNlF8dqaOmoRcKxKLJSpK78Vne/Rn9XRlsA==", null, false, "15d196ae-055c-449e-974e-f8aef922eea2", false, "haha0@haha.com" },
+                    { new Guid("4557069d-02ce-48bc-b728-72e5991dd3ee"), 0, "0748a88b-10a2-4def-b249-0861550aee57", "testGroup@haha.com", false, true, false, null, "testGroup", null, null, null, null, false, "6f407d11-0e38-4585-bc69-11f2c8ef2792", false, "testGroup@haha.com" },
+                    { new Guid("d8793545-96c6-4901-8114-78d82c01504f"), 0, "b9374037-de98-4997-be18-3a4368dbb31f", null, false, false, false, null, "haha1", null, "haha1@haha.com", "AQAAAAIAAYagAAAAEI97Km/uRYo81wmG9qJsLOFO36KrLEbsgBONSEpkC//l3nOh9FRBv9zHY4Bxg7qfPg==", null, false, "9dcad3f4-3720-49bf-8d95-0beb23e05ecf", false, "haha1@haha.com" },
+                    { new Guid("e48d16be-738d-473f-8505-fcd121d8ef35"), 0, "71b1cab5-890e-4c76-8868-2d8cdc001dc7", null, false, false, false, null, "haha4", null, "haha4@haha.com", "AQAAAAIAAYagAAAAEDlb5Kvq/Bpzjr3LDep7P69KOZqFj0zIRK6y4Gk/oviSZRNEeN1eFc2hQVlilr2tNw==", null, false, "d40ac185-b6a6-4dad-a6d5-a3d08c126276", false, "haha4@haha.com" },
+                    { new Guid("eb975911-ba67-4365-b970-3e7fd1aab7df"), 0, "ed5adcf4-0b96-4587-b9b9-2ffa70e6a259", null, false, false, false, null, "haha2", null, "haha2@haha.com", "AQAAAAIAAYagAAAAEDU8UT7Oynzi2GIWXZqTQIzGqlfBdMx0Y2AdpKcATeEPfvyHJ+voWqvlUp9qRmVxcg==", null, false, "4ca81c1b-c8c9-45c7-b743-8d238dc35f77", false, "haha2@haha.com" }
                 });
 
             migrationBuilder.InsertData(
@@ -241,41 +242,41 @@ namespace Hermes.Migrations
                 columns: new[] { "ContactId", "HermesUserId" },
                 values: new object[,]
                 {
-                    { new Guid("06e5492e-bcc8-4b86-9922-04b11349aadb"), new Guid("0012d980-ef0b-4b95-80f6-3d7079f2c7ea") },
-                    { new Guid("7ed880b2-2fb6-464d-af5d-1dd2f1dec54f"), new Guid("0012d980-ef0b-4b95-80f6-3d7079f2c7ea") },
-                    { new Guid("cd8dbff0-cbfe-4f6c-921c-06abb41968fb"), new Guid("0012d980-ef0b-4b95-80f6-3d7079f2c7ea") },
-                    { new Guid("ea398905-831c-444b-b48f-7072dbb506c9"), new Guid("0012d980-ef0b-4b95-80f6-3d7079f2c7ea") },
-                    { new Guid("f1ad9e71-adfa-475c-8945-0c24795624aa"), new Guid("0012d980-ef0b-4b95-80f6-3d7079f2c7ea") },
-                    { new Guid("0012d980-ef0b-4b95-80f6-3d7079f2c7ea"), new Guid("06e5492e-bcc8-4b86-9922-04b11349aadb") },
-                    { new Guid("06e5492e-bcc8-4b86-9922-04b11349aadb"), new Guid("06e5492e-bcc8-4b86-9922-04b11349aadb") },
-                    { new Guid("7ed880b2-2fb6-464d-af5d-1dd2f1dec54f"), new Guid("06e5492e-bcc8-4b86-9922-04b11349aadb") },
-                    { new Guid("cd8dbff0-cbfe-4f6c-921c-06abb41968fb"), new Guid("06e5492e-bcc8-4b86-9922-04b11349aadb") },
-                    { new Guid("ea398905-831c-444b-b48f-7072dbb506c9"), new Guid("06e5492e-bcc8-4b86-9922-04b11349aadb") },
-                    { new Guid("f1ad9e71-adfa-475c-8945-0c24795624aa"), new Guid("06e5492e-bcc8-4b86-9922-04b11349aadb") },
-                    { new Guid("0012d980-ef0b-4b95-80f6-3d7079f2c7ea"), new Guid("7ed880b2-2fb6-464d-af5d-1dd2f1dec54f") },
-                    { new Guid("06e5492e-bcc8-4b86-9922-04b11349aadb"), new Guid("7ed880b2-2fb6-464d-af5d-1dd2f1dec54f") },
-                    { new Guid("7ed880b2-2fb6-464d-af5d-1dd2f1dec54f"), new Guid("7ed880b2-2fb6-464d-af5d-1dd2f1dec54f") },
-                    { new Guid("cd8dbff0-cbfe-4f6c-921c-06abb41968fb"), new Guid("7ed880b2-2fb6-464d-af5d-1dd2f1dec54f") },
-                    { new Guid("ea398905-831c-444b-b48f-7072dbb506c9"), new Guid("7ed880b2-2fb6-464d-af5d-1dd2f1dec54f") },
-                    { new Guid("f1ad9e71-adfa-475c-8945-0c24795624aa"), new Guid("7ed880b2-2fb6-464d-af5d-1dd2f1dec54f") },
-                    { new Guid("0012d980-ef0b-4b95-80f6-3d7079f2c7ea"), new Guid("cd8dbff0-cbfe-4f6c-921c-06abb41968fb") },
-                    { new Guid("06e5492e-bcc8-4b86-9922-04b11349aadb"), new Guid("cd8dbff0-cbfe-4f6c-921c-06abb41968fb") },
-                    { new Guid("7ed880b2-2fb6-464d-af5d-1dd2f1dec54f"), new Guid("cd8dbff0-cbfe-4f6c-921c-06abb41968fb") },
-                    { new Guid("cd8dbff0-cbfe-4f6c-921c-06abb41968fb"), new Guid("cd8dbff0-cbfe-4f6c-921c-06abb41968fb") },
-                    { new Guid("ea398905-831c-444b-b48f-7072dbb506c9"), new Guid("cd8dbff0-cbfe-4f6c-921c-06abb41968fb") },
-                    { new Guid("f1ad9e71-adfa-475c-8945-0c24795624aa"), new Guid("cd8dbff0-cbfe-4f6c-921c-06abb41968fb") },
-                    { new Guid("0012d980-ef0b-4b95-80f6-3d7079f2c7ea"), new Guid("ea398905-831c-444b-b48f-7072dbb506c9") },
-                    { new Guid("06e5492e-bcc8-4b86-9922-04b11349aadb"), new Guid("ea398905-831c-444b-b48f-7072dbb506c9") },
-                    { new Guid("7ed880b2-2fb6-464d-af5d-1dd2f1dec54f"), new Guid("ea398905-831c-444b-b48f-7072dbb506c9") },
-                    { new Guid("cd8dbff0-cbfe-4f6c-921c-06abb41968fb"), new Guid("ea398905-831c-444b-b48f-7072dbb506c9") },
-                    { new Guid("ea398905-831c-444b-b48f-7072dbb506c9"), new Guid("ea398905-831c-444b-b48f-7072dbb506c9") },
-                    { new Guid("f1ad9e71-adfa-475c-8945-0c24795624aa"), new Guid("ea398905-831c-444b-b48f-7072dbb506c9") },
-                    { new Guid("0012d980-ef0b-4b95-80f6-3d7079f2c7ea"), new Guid("f1ad9e71-adfa-475c-8945-0c24795624aa") },
-                    { new Guid("06e5492e-bcc8-4b86-9922-04b11349aadb"), new Guid("f1ad9e71-adfa-475c-8945-0c24795624aa") },
-                    { new Guid("7ed880b2-2fb6-464d-af5d-1dd2f1dec54f"), new Guid("f1ad9e71-adfa-475c-8945-0c24795624aa") },
-                    { new Guid("cd8dbff0-cbfe-4f6c-921c-06abb41968fb"), new Guid("f1ad9e71-adfa-475c-8945-0c24795624aa") },
-                    { new Guid("ea398905-831c-444b-b48f-7072dbb506c9"), new Guid("f1ad9e71-adfa-475c-8945-0c24795624aa") },
-                    { new Guid("f1ad9e71-adfa-475c-8945-0c24795624aa"), new Guid("f1ad9e71-adfa-475c-8945-0c24795624aa") }
+                    { new Guid("038da423-3391-4217-a21c-5b8ae593d52e"), new Guid("038da423-3391-4217-a21c-5b8ae593d52e") },
+                    { new Guid("2af2ada0-ad1f-4494-b038-db75d813fe07"), new Guid("038da423-3391-4217-a21c-5b8ae593d52e") },
+                    { new Guid("4557069d-02ce-48bc-b728-72e5991dd3ee"), new Guid("038da423-3391-4217-a21c-5b8ae593d52e") },
+                    { new Guid("d8793545-96c6-4901-8114-78d82c01504f"), new Guid("038da423-3391-4217-a21c-5b8ae593d52e") },
+                    { new Guid("e48d16be-738d-473f-8505-fcd121d8ef35"), new Guid("038da423-3391-4217-a21c-5b8ae593d52e") },
+                    { new Guid("eb975911-ba67-4365-b970-3e7fd1aab7df"), new Guid("038da423-3391-4217-a21c-5b8ae593d52e") },
+                    { new Guid("038da423-3391-4217-a21c-5b8ae593d52e"), new Guid("2af2ada0-ad1f-4494-b038-db75d813fe07") },
+                    { new Guid("2af2ada0-ad1f-4494-b038-db75d813fe07"), new Guid("2af2ada0-ad1f-4494-b038-db75d813fe07") },
+                    { new Guid("4557069d-02ce-48bc-b728-72e5991dd3ee"), new Guid("2af2ada0-ad1f-4494-b038-db75d813fe07") },
+                    { new Guid("d8793545-96c6-4901-8114-78d82c01504f"), new Guid("2af2ada0-ad1f-4494-b038-db75d813fe07") },
+                    { new Guid("e48d16be-738d-473f-8505-fcd121d8ef35"), new Guid("2af2ada0-ad1f-4494-b038-db75d813fe07") },
+                    { new Guid("eb975911-ba67-4365-b970-3e7fd1aab7df"), new Guid("2af2ada0-ad1f-4494-b038-db75d813fe07") },
+                    { new Guid("038da423-3391-4217-a21c-5b8ae593d52e"), new Guid("4557069d-02ce-48bc-b728-72e5991dd3ee") },
+                    { new Guid("2af2ada0-ad1f-4494-b038-db75d813fe07"), new Guid("4557069d-02ce-48bc-b728-72e5991dd3ee") },
+                    { new Guid("d8793545-96c6-4901-8114-78d82c01504f"), new Guid("4557069d-02ce-48bc-b728-72e5991dd3ee") },
+                    { new Guid("e48d16be-738d-473f-8505-fcd121d8ef35"), new Guid("4557069d-02ce-48bc-b728-72e5991dd3ee") },
+                    { new Guid("eb975911-ba67-4365-b970-3e7fd1aab7df"), new Guid("4557069d-02ce-48bc-b728-72e5991dd3ee") },
+                    { new Guid("038da423-3391-4217-a21c-5b8ae593d52e"), new Guid("d8793545-96c6-4901-8114-78d82c01504f") },
+                    { new Guid("2af2ada0-ad1f-4494-b038-db75d813fe07"), new Guid("d8793545-96c6-4901-8114-78d82c01504f") },
+                    { new Guid("4557069d-02ce-48bc-b728-72e5991dd3ee"), new Guid("d8793545-96c6-4901-8114-78d82c01504f") },
+                    { new Guid("d8793545-96c6-4901-8114-78d82c01504f"), new Guid("d8793545-96c6-4901-8114-78d82c01504f") },
+                    { new Guid("e48d16be-738d-473f-8505-fcd121d8ef35"), new Guid("d8793545-96c6-4901-8114-78d82c01504f") },
+                    { new Guid("eb975911-ba67-4365-b970-3e7fd1aab7df"), new Guid("d8793545-96c6-4901-8114-78d82c01504f") },
+                    { new Guid("038da423-3391-4217-a21c-5b8ae593d52e"), new Guid("e48d16be-738d-473f-8505-fcd121d8ef35") },
+                    { new Guid("2af2ada0-ad1f-4494-b038-db75d813fe07"), new Guid("e48d16be-738d-473f-8505-fcd121d8ef35") },
+                    { new Guid("4557069d-02ce-48bc-b728-72e5991dd3ee"), new Guid("e48d16be-738d-473f-8505-fcd121d8ef35") },
+                    { new Guid("d8793545-96c6-4901-8114-78d82c01504f"), new Guid("e48d16be-738d-473f-8505-fcd121d8ef35") },
+                    { new Guid("e48d16be-738d-473f-8505-fcd121d8ef35"), new Guid("e48d16be-738d-473f-8505-fcd121d8ef35") },
+                    { new Guid("eb975911-ba67-4365-b970-3e7fd1aab7df"), new Guid("e48d16be-738d-473f-8505-fcd121d8ef35") },
+                    { new Guid("038da423-3391-4217-a21c-5b8ae593d52e"), new Guid("eb975911-ba67-4365-b970-3e7fd1aab7df") },
+                    { new Guid("2af2ada0-ad1f-4494-b038-db75d813fe07"), new Guid("eb975911-ba67-4365-b970-3e7fd1aab7df") },
+                    { new Guid("4557069d-02ce-48bc-b728-72e5991dd3ee"), new Guid("eb975911-ba67-4365-b970-3e7fd1aab7df") },
+                    { new Guid("d8793545-96c6-4901-8114-78d82c01504f"), new Guid("eb975911-ba67-4365-b970-3e7fd1aab7df") },
+                    { new Guid("e48d16be-738d-473f-8505-fcd121d8ef35"), new Guid("eb975911-ba67-4365-b970-3e7fd1aab7df") },
+                    { new Guid("eb975911-ba67-4365-b970-3e7fd1aab7df"), new Guid("eb975911-ba67-4365-b970-3e7fd1aab7df") }
                 });
 
             migrationBuilder.InsertData(
@@ -283,11 +284,11 @@ namespace Hermes.Migrations
                 columns: new[] { "GroupId", "HermesUserId" },
                 values: new object[,]
                 {
-                    { new Guid("0012d980-ef0b-4b95-80f6-3d7079f2c7ea"), new Guid("06e5492e-bcc8-4b86-9922-04b11349aadb") },
-                    { new Guid("0012d980-ef0b-4b95-80f6-3d7079f2c7ea"), new Guid("7ed880b2-2fb6-464d-af5d-1dd2f1dec54f") },
-                    { new Guid("0012d980-ef0b-4b95-80f6-3d7079f2c7ea"), new Guid("cd8dbff0-cbfe-4f6c-921c-06abb41968fb") },
-                    { new Guid("0012d980-ef0b-4b95-80f6-3d7079f2c7ea"), new Guid("ea398905-831c-444b-b48f-7072dbb506c9") },
-                    { new Guid("0012d980-ef0b-4b95-80f6-3d7079f2c7ea"), new Guid("f1ad9e71-adfa-475c-8945-0c24795624aa") }
+                    { new Guid("4557069d-02ce-48bc-b728-72e5991dd3ee"), new Guid("038da423-3391-4217-a21c-5b8ae593d52e") },
+                    { new Guid("4557069d-02ce-48bc-b728-72e5991dd3ee"), new Guid("2af2ada0-ad1f-4494-b038-db75d813fe07") },
+                    { new Guid("4557069d-02ce-48bc-b728-72e5991dd3ee"), new Guid("d8793545-96c6-4901-8114-78d82c01504f") },
+                    { new Guid("4557069d-02ce-48bc-b728-72e5991dd3ee"), new Guid("e48d16be-738d-473f-8505-fcd121d8ef35") },
+                    { new Guid("4557069d-02ce-48bc-b728-72e5991dd3ee"), new Guid("eb975911-ba67-4365-b970-3e7fd1aab7df") }
                 });
 
             migrationBuilder.CreateIndex(

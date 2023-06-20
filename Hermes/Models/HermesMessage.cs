@@ -11,6 +11,7 @@ namespace Hermes.Models
         public Guid ReceiverId { get; set; }
         public Guid? GroupId { get; set; }
         public string Message { get; set; }
+        public bool Delivered { get; set; }
         public DateTimeOffset Time { get; set; }
     }
 }

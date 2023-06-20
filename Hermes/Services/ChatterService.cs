@@ -1,14 +1,14 @@
-﻿using Grpc.Core;
+﻿using Google.Protobuf.WellKnownTypes;
+using Grpc.Core;
+using Hermes.Classes;
 using Hermes.Protos;
+using IdentityServer4.AccessTokenValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
-using System.Threading.Tasks;
-using IdentityServer4.AccessTokenValidation;
-using Microsoft.AspNetCore.Authorization;
-using Google.Protobuf.WellKnownTypes;
-using Hermes.Classes;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace Hermes.Services
 {
@@ -26,13 +26,14 @@ namespace Hermes.Services
             _usersManager = userManager;
         }
 
-        public override async Task connect(Empty request, IServerStreamWriter<ChatReply> responseStream, ServerCallContext context)
+        public override async Task connectMessages(Empty request, IServerStreamWriter<ChatReply> responseStream, ServerCallContext context)
         {
-            var hehe = context.GetHttpContext().User;
-            if (Guid.TryParse(context.GetHttpContext().User.Claims.Where(static x => x.Type == ClaimTypes.NameIdentifier).FirstOrDefault()?.Value, out var ext_id))
+            var userId = context.GetHttpContext().User.Claims.Where(static x => x.Type == ClaimTypes.NameIdentifier).FirstOrDefault()?.Value;
+            if (Guid.TryParse(userId, out var ext_id))
             {
-                _chatManager.Suscribe(ext_id, responseStream);
-              
+                _usersManager.AddUserOnlineStatus(ext_id);
+                await _chatManager.SuscribeForMessages(ext_id, responseStream);
+               
                 try
                 {
                     await Task.Delay(-1, context.CancellationToken);
@@ -40,16 +41,51 @@ namespace Hermes.Services
                 catch (TaskCanceledException)
                 {
                     _chatManager.UnSuscribe(ext_id);
+                    _usersManager.RemoveUser(ext_id);
+                    await _chatManager.AddStatusAsync(new ChatStatus { From = userId, IsOnline = false, IsTyping = false });
+                }
+                //catch (Exception)
+                //{
+                //    _chatManager.UnSuscribe(ext_id);
+                //    _usersManager.RemoveUser(ext_id);
+                //}
+            }
+        }
+
+        public override async Task connectStatus(Empty request, IServerStreamWriter<ChatStatus> responseStream, ServerCallContext context)
+        {
+            if (Guid.TryParse(context.GetHttpContext().User.Claims.Where(static x => x.Type == ClaimTypes.NameIdentifier).FirstOrDefault()?.Value, out var ext_id))
+            {
+                await _chatManager.SuscribeForStatus(ext_id, responseStream);
+              
+                try
+                {
+                    await Task.Delay(-1, context.CancellationToken);
+                }
+                catch (TaskCanceledException)
+                {
+                    //    _chatManager.UnSuscribe(ext_id);
                 }
                 catch (Exception)
                 {
-                    _chatManager.UnSuscribe(ext_id);
+                    //    _chatManager.UnSuscribe(ext_id);
                 }
             }
         }
+        public override async Task<Empty> sendIsTyping(ChatStatus chatStatus, ServerCallContext context)
+        {
+            if (Guid.TryParse(context.GetHttpContext().User.Claims.Where(static x => x.Type == ClaimTypes.NameIdentifier).FirstOrDefault()?.Value, out var ext_id) && Guid.TryParse(chatStatus.From, out var fromId))
+            {
+                if (ext_id == fromId)
+                {
+                    await _chatManager.AddStatusAsync(chatStatus);
+                }
+            }
+            return new Empty();
+        }
         public override Task<Contact> addGroup(AddGroupRequest request, ServerCallContext context)
         {
-            if (_usersManager.TryAddGroup(request,Guid.NewGuid(), out var group))
+            if (_usersManager.TryAddGroup(request, Guid.NewGuid(), out var group))
             {
                 return Task.FromResult(group);
             }
@@ -62,7 +98,7 @@ namespace Hermes.Services
         {
             if (await _usersManager.CheckIfGroupAsync(sendRequest.To))
             {
-                var messages = _usersManager.GetMessagesForGroup(sendRequest);
+                var messages = await _usersManager.GetMessagesForGroup(sendRequest);
                 foreach (var msg in messages)
                 {
                     await _chatManager.AddMessageAsync(msg);
@@ -76,10 +112,10 @@ namespace Hermes.Services
 
             return new Empty();
         }
-        public override  async Task<GetContactsReply> getContacts(Empty request, ServerCallContext context)
+        public override async Task<GetContactsReply> getContacts(Empty request, ServerCallContext context)
         {
-            var externalId =  context.GetHttpContext().User.Claims.Where(static x => x.Type == ClaimTypes.NameIdentifier).FirstOrDefault()?.Value;
-            var contacts =  await _usersManager.GetContactsAsync(externalId);
+            var externalId = context.GetHttpContext().User.Claims.Where(static x => x.Type == ClaimTypes.NameIdentifier).FirstOrDefault()?.Value;
+            var contacts = await _usersManager.GetContactsAsync(externalId);
             var reply = new GetContactsReply();
             reply.Contacts.AddRange(contacts);
             return reply;

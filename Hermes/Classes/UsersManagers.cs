@@ -1,28 +1,41 @@
-﻿using System;
+﻿using Hermes.Context;
+using Hermes.Models;
+using Hermes.Protos;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Hermes.Context;
-using Hermes.Models;
-using Hermes.Protos;
-using IdentityServer4.Test;
-using Microsoft.EntityFrameworkCore;
 
 namespace Hermes.Classes
 {
     public class UsersManagers
     {
         private readonly CryptoHelper _cryptoHelper;
-        private readonly HermesContext _hermesContext;
+        private readonly ConcurrentDictionary<Guid, bool> OnlineUsers = new ConcurrentDictionary<Guid, bool>();
+        private readonly IServiceProvider _serviceProvider;
 
-        public UsersManagers(CryptoHelper cryptoHelper, HermesContext hermesContext)
+        public UsersManagers(CryptoHelper cryptoHelper, IServiceProvider serviceProvider)
         {
             _cryptoHelper = cryptoHelper;
-            _hermesContext = hermesContext;
+            _serviceProvider = serviceProvider;
         }
 
+        public bool AddUserOnlineStatus(Guid userId)
+        {
+            return OnlineUsers.TryAdd(userId, true);
+        }
+        //public bool IsUserOnline(Guid userId)
+        //{
+        //    return OnlineUsers.ContainsKey(userId);
+        //}
+        public bool RemoveUser(Guid userId)
+        {
+            return OnlineUsers.TryRemove(userId, out var _);
+        }
 
         /// <summary>
         /// Get the contacts of a loggedin user.
@@ -30,10 +43,12 @@ namespace Hermes.Classes
         /// <param name="userId">the user's id</param>
         public async Task<IEnumerable<Contact>> GetContactsAsync(string userId)
         {
+            using var scope = _serviceProvider.CreateScope();
+            var hermesContext = scope.ServiceProvider.GetRequiredService<HermesContext>();
             var ext_id = Guid.Parse(userId);
 
             var contacts = new List<Contact>();
-            var uscon = await _hermesContext.Users
+            var uscon = await hermesContext.Users
                 .Include(x => x.Contacts)
                 .AsNoTracking()
                 .Where(x => x.Id == ext_id)?
@@ -46,7 +61,7 @@ namespace Hermes.Classes
 
             foreach (var user in uscon)
             {
-                contacts.Add(new Contact() { Id = user.Id.ToString(), Name = user.Name, Email = user.UserName });
+                contacts.Add(new Contact() { Id = user.Id.ToString(), Name = user.Name, Email = user.UserName, IsOnline = OnlineUsers.ContainsKey(user.Id), IsGroup = user.IsGroup });
             }
             return contacts;
         }
@@ -58,15 +73,17 @@ namespace Hermes.Classes
         /// <param name="email"></param>
         public async Task<Contact> AddContactAsync(Guid userId, AddContactRequest acr, CancellationToken cancellationToken)
         {
+            using var scope = _serviceProvider.CreateScope();
+            var hermesContext = scope.ServiceProvider.GetRequiredService<HermesContext>();
             var loweredEmail = acr.Email.ToLowerInvariant();
-            var newContact = await _hermesContext.Users.FindAsync(loweredEmail, cancellationToken);
-            var currentUser = _hermesContext.Users.FirstOrDefault(x => x.Id == userId);
+            var newContact = await hermesContext.Users.FindAsync(new object[] { loweredEmail, cancellationToken }, cancellationToken: cancellationToken);
+            var currentUser = hermesContext.Users.FirstOrDefault(x => x.Id == userId);
             if (newContact == null || currentUser == null)
                 return null;
             currentUser.Contacts.Add(newContact);
             newContact.Contacts.Add(currentUser);
-            await _hermesContext.SaveChangesAsync(cancellationToken);
-            return new Contact { Id = newContact.Id.ToString(), Name = newContact.Name, Email = newContact.UserName, IsGroup = false };
+            await hermesContext.SaveChangesAsync(cancellationToken);
+            return new Contact { Id = newContact.Id.ToString(), Name = newContact.Name, Email = newContact.UserName, IsGroup = false, IsOnline = OnlineUsers.ContainsKey(newContact.Id) };
 
 
         }
@@ -79,10 +96,12 @@ namespace Hermes.Classes
         {
             if (CheckIfEmailExists(user.UserName))
                 return false;
+            using var scope = _serviceProvider.CreateScope();
+            var hermesContext = scope.ServiceProvider.GetRequiredService<HermesContext>();
             user.Password = _cryptoHelper.Encrypt(user.Password);
             user.Contacts.Add(user);
-            await _hermesContext.Users.AddAsync(user, cancellationToken);
-            return await _hermesContext.SaveChangesAsync(cancellationToken) > 0;
+            await hermesContext.Users.AddAsync(user, cancellationToken);
+            return await hermesContext.SaveChangesAsync(cancellationToken) > 0;
         }
         /// <summary>
         /// Checks if id belongs to a group.
@@ -92,20 +111,24 @@ namespace Hermes.Classes
         {
             if (Guid.TryParse(id, out var parsedId))
             {
-                return await _hermesContext.Users.AsNoTracking()
+                using var scope = _serviceProvider.CreateScope();
+                var hermesContext = scope.ServiceProvider.GetRequiredService<HermesContext>();
+                return await hermesContext.Users.AsNoTracking()
                     .AnyAsync(x => x.Id == parsedId && x.IsGroup);
             }
             return false;
         }
 
-        public List<ChatReply> GetMessagesForGroup(SendRequest sendRequest)
+        public async Task<List<ChatReply>> GetMessagesForGroup(SendRequest sendRequest)
         {
             var result = new List<ChatReply>();
 
             if (Guid.TryParse(sendRequest.To, out var groupId))
             {
-                var senderId = _hermesContext.Users.AsNoTracking().Where(x => x.Id == Guid.Parse(sendRequest.From)).FirstOrDefault()?.Id;
-                var groupMembers = _hermesContext.Users.Include(u => u.Contacts).Where(x => x.Id == groupId && x.IsGroup).ToList();
+                using var scope = _serviceProvider.CreateScope();
+                var hermesContext = scope.ServiceProvider.GetRequiredService<HermesContext>();
+                var senderId =  (await hermesContext.Users.AsNoTracking().Where(x => x.Id == Guid.Parse(sendRequest.From)).FirstOrDefaultAsync())?.Id;
+                var groupMembers = (await hermesContext.Users.AsNoTracking().Include(u => u.Contacts).Where(x => x.Id == groupId && x.IsGroup).FirstOrDefaultAsync())?.Contacts;
                 foreach (var member in groupMembers)
                 {
                     if (senderId != null && member.Id == senderId)
@@ -118,6 +141,8 @@ namespace Hermes.Classes
 
         public bool TryAddGroup(AddGroupRequest addGroupRequest, Guid userId, out Contact group)
         {
+            using var scope = _serviceProvider.CreateScope();
+            var hermesContext = scope.ServiceProvider.GetRequiredService<HermesContext>();
             var hu = new HermesUser
             {
                 IsGroup = true,
@@ -129,7 +154,8 @@ namespace Hermes.Classes
             {
                 if (Guid.TryParse(member.Id, out var parsedId))
                 {
-                    var currentMember = _hermesContext.Users.Where(u => u.Id == parsedId).FirstOrDefault();
+                   
+                    var currentMember = hermesContext.Users.Where(u => u.Id == parsedId).FirstOrDefault();
                     if (currentMember != null)
                     {
                         hu.Contacts.Add(currentMember);
@@ -138,10 +164,10 @@ namespace Hermes.Classes
                     }
                 }
             }
-            _hermesContext.Users.Add(hu);
+            hermesContext.Users.Add(hu);
 
             group = new Contact { Id = hu.Id.ToString(), Name = hu.Name, Email = hu.UserName, IsGroup = true };
-            return  _hermesContext.SaveChanges() > 0;
+            return hermesContext.SaveChanges() > 0;
         }
 
         /// <summary>
@@ -150,7 +176,9 @@ namespace Hermes.Classes
         /// <param name="email"></param>
         private bool CheckIfEmailExists(string email)
         {
-            return _hermesContext.Users.Any(x => string.Equals(x.UserName, email, StringComparison.OrdinalIgnoreCase));
+            using var scope = _serviceProvider.CreateScope();
+            var hermesContext = scope.ServiceProvider.GetRequiredService<HermesContext>();
+            return hermesContext.Users.Any(x => string.Equals(x.UserName, email, StringComparison.OrdinalIgnoreCase));
         }
 
     }
